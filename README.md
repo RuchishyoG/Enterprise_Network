@@ -1,4 +1,4 @@
-# Enterprise_Network
+# Enterprise Network
 A complete network layout of a sample company using routers, switches and servers, configured using Cisco Packet Tracer.
 
 Here, an enterprise network is created and interfaced with the given ISP connection. The ISP provided the enterprise an IP address range starting with 202.195.32.0/24, to form 2 virtual networks A (30 hosts) and B (30 hosts) as well as 2 physical networks C (60 hosts) and D (12 hosts) with a default link pairing the ISP router and the Enterprise router.
