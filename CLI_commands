@@ -1,0 +1,143 @@
+----------Switch 1------------
+Switch>en
+Switch#conf t
+Switch(config)#hostname S1
+S1(config)#vlan 2
+S1(config-vlan)#name A
+S1(config-vlan)#exit
+S1(config)#int vlan 2
+S1(config-if)#ip address 202.195.32.65 255.255.255.224
+S1(config-if)#exit
+
+S1(config)#vlan 3
+S1(config-vlan)#name B
+S1(config-vlan)#exit
+S1(config)#int vlan 3
+S1(config-if)#ip address 202.195.32.97 255.255.255.224
+S1(config-if)#exit
+
+S1(config)#int range fa0/1-10
+S1(config-if-range)#switchport mode access
+S1(config-if-range)#switchport access vlan 2
+S1(config-if-range)#exit
+S1(config)#int range fa0/11-20
+S1(config-if-range)#switchport mode access
+S1(config-if-range)#switchport access vlan 3
+S1(config-if-range)#exit
+
+S1(config)#int gig0/2
+S1(config-if)#switchport mode trunk
+S1(config-if)#switchport trunk allowed vlan 2,3
+S1(config-if)#exit
+S1(config)#int gig0/1
+S1(config-if)#switchport mode trunk
+S1(config-if)#switchport trunk allowed vlan 2,3
+S1(config-if)#end
+
+----------Switch 2------------
+Switch>en
+Switch#
+Switch#conf t
+Switch(config)#hostname S2
+S2(config)#vlan 2
+S2(config-vlan)#name A
+S2(config-vlan)#exit
+S2(config)#int vlan 2
+S2(config-if)#ip address 202.195.32.69 255.255.255.224
+S2(config-if)#exit
+
+S2(config)#vlan 3
+S2(config-vlan)#name B
+S2(config-vlan)#exit
+S2(config)#int vlan 3
+S2(config-if)#ip address 202.195.32.105 255.255.255.224
+S2(config-if)#exit
+
+S2(config)#int range fa0/1-10
+S2(config-if-range)#switchport mode access
+S2(config-if-range)#switchport access vlan 2
+S2(config-if-range)#exit
+S2(config)#int range fa0/11-20
+S2(config-if-range)#switchport mode access
+S2(config-if-range)#switchport access vlan 3
+S2(config-if-range)#exit
+
+S2(config)#int gig0/2
+S2(config-if)#switchport mode trunk
+S2(config-if)#switchport trunk allowed vlan 2,3
+S2(config-if)#end
+
+----------Router_AB------------
+Router>en
+Router#conf t
+Router(config)#hostname R_AB
+R_AB(config)#int gig0/1
+R_AB(config-if)#no ip address
+R_AB(config-if)#no shutdown
+R_AB(config-if)#exit
+
+R_AB(config)#int gig0/1.2
+R_AB(config-subif)#encapsulation dot1Q 2
+R_AB(config-subif)#ip address 202.195.32.66 255.255.255.224
+R_AB(config-subif)#exit
+
+R_AB(config)#int gig0/1.3
+R_AB(config-subif)#encapsulation dot1Q 3
+R_AB(config-subif)#ip address 202.195.32.98 255.255.255.224
+
+R_AB(config-subif)#ip helper-address 202.195.32.98
+R_AB(config-subif)#exit
+
+R_AB(config)# router ospf 2
+R_AB(config-router)# network 202.195.32.144 0.0.0.3 area 0
+R_AB(config-router)# network 202.195.32.148 0.0.0.3 area 0
+R_AB(config-router)# network 202.195.32.64 0.0.0.31 area 0
+R_AB(config-router)# network 202.195.32.96 0.0.0.31 area 0
+R_AB(config-router)# exit
+
+R_AB(config)#access-list 101 permit udp any eq bootpc any eq bootps
+R_AB(config)#access-list 101 deny ip any any
+R_AB(config)#int gig0/1.2
+R_AB(config-subif)#ip access-group 101 in
+R_AB(config-subif)#exit
+
+R_AB(config)#access-list 102 deny ip any host 200.20.10.2
+R_AB(config)#access-list 102 permit ip any any
+R_AB(config)#int gig0/1.3
+R_AB(config-subif)#ip access-group 102 in
+R_AB(config-subif)#end
+
+----------Router_C------------ 
+Router>en
+Router#conf t
+Router(config)#hostname R_C
+R_C(config)#int gig0/1
+R_C(config-if)#ip address 202.195.32.1 255.255.255.192
+R_C(config-if)#no shutdown
+R_C(config-if)#exit
+
+R_C(config)# router ospf 1
+R_C(config-router)# network 202.195.32.152 0.0.0.3 area 0
+R_C(config-router)# network 202.195.32.144 0.0.0.3 area 0
+R_C(config-router)# network 202.195.32.0 0.0.0.63 area 0
+R_C(config-router)# exit
+
+R_C(config)# access-list 103 deny ip any host 202.195.32.130
+R_C(config)#access-list 103 permit ip any any
+R_C(config)#int gig0/1
+R_C(config-if)#ip access-group 103 in
+R_C(config-if)#end
+
+----------Router_Enterprise------------ 
+Router>en
+Router#conf t
+Router(config)#hostname R_Ent
+
+R_Ent(config)# router ospf 3
+R_Ent(config-router)# network 202.195.32.152 0.0.0.3 area 0
+R_Ent(config-router)# network 202.195.32.148 0.0.0.3 area 0
+R_Ent(config-router)# network 202.195.32.128 0.0.0.15 area 0
+R_Ent(config-router)# network 200.10.10.0 0.0.0.3 area 0
+R_Ent(config-router)# exit
+
+R_Ent(config)#ip route 202.195.32.0 255.255.255.0 200.10.10.2/s0/3/0
